@@ -17,7 +17,7 @@ points in the partition, and the whole procedure is repeated until no centroid i
 no points are assigned to another cluster. Upon completion, the algorithm returns the
 coordinates of the final k centroids.
 
-![Figure](figure.png)
+![Figure](images/figure.png)
 
 
 ### Input
@@ -30,7 +30,7 @@ The input must be read from the standard input
 The program will print k lines containing (x, y, z) coordinates of the re-clustered k centroids.
 The output must be written to the standard output.
 
-![Example](example.png)
+![Example](images/example.png)
 
 
 ## Criterios de avaliacao:
