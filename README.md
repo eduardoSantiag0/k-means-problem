@@ -31,3 +31,15 @@ The program will print k lines containing (x, y, z) coordinates of the re-cluste
 The output must be written to the standard output.
 
 ![Example](example.png)
+
+
+## Criterios de avaliacao:
+
+| Critério | Pontos |
+| :--- | :---: |
+| Modelagem e estratégia | 2,0 |
+| Threads / OpenMP (memória compartilhada) | 2,5 |
+| MPI (memória distribuída) | 2,5 |
+| Análise de desempenho | 1,5 |
+| Documentação | 1,5 |
+| **Total** | **10,0** |
