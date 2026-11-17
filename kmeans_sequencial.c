@@ -1,6 +1,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <math.h>
 
 typedef struct {
     double x;
@@ -10,7 +12,7 @@ typedef struct {
 } Points;
 
 // Calcula a distancia euclidiana ao quadrado
-double distance(Points a, Points b) {
+double distance_squared(Points a, Points b) {
     double distance = sqrt(
         pow(a.x - b.x, 2) +
         pow(a.y - b.y, 2) +
@@ -168,8 +170,14 @@ int main(void) {
         points[i].cluster = -1;
     }
 
+    double start_time = omp_get_wtime();
+
     // Executar K-Means
     kmeans(points, centroids, n_points, k, sums, counts);
+
+    double end_time = omp_get_wtime();
+    
+    double elapsed_time = end_time - start_time;
 
     // Imprimir os centroides finais
     for (int i = 0; i < k; i++) {
@@ -178,7 +186,7 @@ int main(void) {
                centroids[i].y,
                centroids[i].z);
     }
-
+    printf("Tempo de execucao: %.9f segundos\n", elapsed_time);
     free(centroids);
     free(points);
     free(sums);
@@ -188,4 +196,6 @@ int main(void) {
 }
 
 
-// gcc -O2 -Wall -Wextra kmeans.c -o kmeans; ./kmeans < km.in
+// gcc  -Wall -Wextra kmeans_sequencial.c -fopenmp -lm -o kmeans_sequencial; ./kmeans_sequencial < km_2000.in
+
+// gcc -O2 -Wall -Wextra -fopenmp kmeans_openmp.c -lm -o kmeans_openmp && OMP_NUM_THREADS=4 ./kmeans_openmp < km_source_params.in
