@@ -13,14 +13,12 @@ typedef struct {
 } Points;
 
 // Calcula a distancia euclidiana ao quadrado
-double distance_squared(Points a, Points b) {
-    double distance = sqrt(
-        pow(a.x - b.x, 2) +
-        pow(a.y - b.y, 2) +
-        pow(a.z - b.z, 2)
-    );
+double distance_squared(const Points *a, const Points *b) {
+    double dx = a->x - b->x;
+    double dy = a->y - b->y;
+    double dz = a->z - b->z;
 
-    return distance;
+    return dx * dx + dy * dy + dz * dz;
 }
 
 // PASSO 1: Atribuir cada ponto ao centroide mais proximo
@@ -34,12 +32,12 @@ int assign_clusters(Points *points, const Points *centroids, int start, int end,
 
         int nearest = 0;
         double min_distance =
-            distance_squared(points[i], centroids[0]);
+            distance_squared(&points[i], &centroids[0]);
 
         // Encontrar o centroide mais proximo
         for (int j = 1; j < k; j++) {
             double distance =
-                distance_squared(points[i], centroids[j]);
+                distance_squared(&points[i], &centroids[j]);
 
             if (distance < min_distance) {
                 min_distance = distance;
@@ -85,10 +83,6 @@ void kmeans(Points *points, Points *centroids,
     }
 
 
-    // todas as threads modificarão os mesmos centroids, sums e counts. 
-
-    // Precisará de acumuladores locais por thread
-        // e uma etapa de redução antes de atualizar os centroides globais.
     #pragma omp parallel num_threads(N_THREADS)
     {
 
@@ -104,6 +98,11 @@ void kmeans(Points *points, Points *centroids,
 
         while (1)
         {
+            // Garante que todas as threads já leram o "changed" da
+            // iteracao anterior (no "if" do fim do loop) antes que a
+            // master zere a variavel para a proxima iteracao.
+            #pragma omp barrier
+
             #pragma omp master
             {
                 changed = 0;
@@ -202,7 +201,6 @@ int main(void) {
         return 1;
     }
 
-    // Alocar memoria
     Points *centroids = malloc(k * sizeof(Points));
     Points *points = malloc(n_points * sizeof(Points));
     Points *sums = malloc(k * sizeof(Points));

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <omp.h>
 
 typedef struct {
     double x;
@@ -12,14 +13,12 @@ typedef struct {
 } Points;
 
 // Calcula a distancia euclidiana ao quadrado
-double distance_squared(Points a, Points b) {
-    double distance = sqrt(
-        pow(a.x - b.x, 2) +
-        pow(a.y - b.y, 2) +
-        pow(a.z - b.z, 2)
-    );
+double distance_squared(const Points *a, const Points *b) {
+    double dx = a->x - b->x;
+    double dy = a->y - b->y;
+    double dz = a->z - b->z;
 
-    return distance;
+    return dx * dx + dy * dy + dz * dz;
 }
 
 // PASSO 1: Atribuir cada ponto ao centroide mais proximo
@@ -33,12 +32,12 @@ int assign_clusters(Points *points, const Points *centroids,
 
         int nearest = 0;
         double min_distance =
-            distance_squared(points[i], centroids[0]);
+            distance_squared(&points[i], &centroids[0]);
 
         // Encontrar o centroide mais proximo
         for (int j = 1; j < k; j++) {
             double distance =
-                distance_squared(points[i], centroids[j]);
+                distance_squared(&points[i], &centroids[j]);
 
             if (distance < min_distance) {
                 min_distance = distance;
