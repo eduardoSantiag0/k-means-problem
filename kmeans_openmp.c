@@ -55,6 +55,38 @@ int assign_clusters(Points *points, const Points *centroids, int start, int end,
     return changed;
 }
 
+void master_update_centroids (Points *sums, int *counts, Points *partial_sums, int  total, Points *centroids, int k, int *partial_counts ) 
+{
+        // PASSO 2: Calcular a media de cada cluster
+        for (int j = 0; j < k; j++) {
+            sums[j].x = 0;
+            sums[j].y = 0;
+            sums[j].z = 0;
+            counts[j] = 0;
+
+            for (int t = 0; t < total; t++) {
+                int pos = t * k + j;
+
+                sums[j].x += partial_sums[pos].x;
+                sums[j].y += partial_sums[pos].y;
+                sums[j].z += partial_sums[pos].z;
+
+                counts[j] += partial_counts[pos];
+            }
+
+            if (counts[j] > 0) {
+                centroids[j].x =
+                    sums[j].x / counts[j];
+
+                centroids[j].y =
+                    sums[j].y / counts[j];
+
+                centroids[j].z =
+                    sums[j].z / counts[j];
+            }
+        }
+}
+
 
 // PASSO 3: Repetir ate convergir
 void kmeans(Points *points, Points *centroids,
@@ -143,34 +175,7 @@ void kmeans(Points *points, Points *centroids,
 
             #pragma omp master
             {
-                // PASSO 2: Calcular a media de cada cluster
-                for (int j = 0; j < k; j++) {
-                    sums[j].x = 0;
-                    sums[j].y = 0;
-                    sums[j].z = 0;
-                    counts[j] = 0;
-
-                    for (int t = 0; t < total; t++) {
-                        int pos = t * k + j;
-
-                        sums[j].x += partial_sums[pos].x;
-                        sums[j].y += partial_sums[pos].y;
-                        sums[j].z += partial_sums[pos].z;
-
-                        counts[j] += partial_counts[pos];
-                    }
-
-                    if (counts[j] > 0) {
-                        centroids[j].x =
-                            sums[j].x / counts[j];
-
-                        centroids[j].y =
-                            sums[j].y / counts[j];
-
-                        centroids[j].z =
-                            sums[j].z / counts[j];
-                    }
-                }
+                master_update_centroids(sums, counts, partial_sums, total, centroids, k, partial_counts );
             }
 
 
