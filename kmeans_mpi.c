@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <mpi.h>
 
-#define MASTER if (rank == 0)
+#define HOST if (rank == 0)
 
 typedef struct {
     double x;
@@ -111,7 +111,7 @@ void kmeans(Points *points, Centroids *centroids,
     // Apenas o master
     int *sendcounts  = NULL;
     int *displs = NULL;
-    MASTER {
+    HOST {
         if (n_process > INT_MAX / (int)sizeof(int)) {
             fprintf(stderr, "Too many MPI processes\n");
             MPI_Abort(MPI_COMM_WORLD, 1);
@@ -182,7 +182,7 @@ void kmeans(Points *points, Centroids *centroids,
             MPI_COMM_WORLD
         );
 
-        MASTER {
+        HOST {
             update_centroids(global_sums, counts, centroids, k);
         }
 
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
     int n_points = 0;
 
     // Ler k e n da entrada padrao
-    MASTER {
+    HOST {
         if (scanf("%d %d", &k, &n_points) != 2 || k <= 0 || n_points <= 0) {
             fprintf(stderr, "Invalid input\n");
             MPI_Abort(MPI_COMM_WORLD, 1);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     Points *points = NULL;
     int counts[k];
 
-    MASTER {
+    HOST {
         points = malloc(n_points * sizeof(Points));
     }
 
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Lendo os inputs
-    MASTER {
+    HOST {
         for (int i = 0; i < k; i++) {
             if (scanf("%lf %lf %lf",
                       &centroids[i].x,
@@ -299,7 +299,7 @@ int main(int argc, char *argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     end = MPI_Wtime();
 
-    MASTER {
+    HOST {
         for (int i = 0; i < k; i++) {
             printf("%.6f %.6f %.6f\n",
                    centroids[i].x,
